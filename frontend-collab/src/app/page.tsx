@@ -81,6 +81,7 @@ export default function Home() {
   }
 
   const handleGenerateRoom = async () => {
+
     try {
       const response = await fetch("http://localhost:8080/api/room/generateRoomId", {
         method: 'POST',
@@ -88,7 +89,7 @@ export default function Home() {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ userName: "Vishnu", songs: selectedSongs })
+        body: JSON.stringify({ userName: `Vishnu ${crypto.randomUUID()}`, songs: selectedSongs })
       })
       const data = await response.json();
       setRoom(data)

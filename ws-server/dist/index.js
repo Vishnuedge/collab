@@ -42,17 +42,32 @@ const ws_1 = __importStar(require("ws"));
 const server = http_1.default.createServer();
 const PORT = process.env.PORT || 5001;
 const wss = new ws_1.WebSocketServer({ server });
-const users = {};
+let socketRooms = [];
 wss.on("connection", (ws) => {
     ws.on("error", console.error);
     ws.on("message", (message) => {
         try {
             const data = JSON.parse(message.toString());
-            if (data.type == "join") {
-                users[data.userId] = ws;
+            if (data.type === "join") {
+                let room = socketRooms.find((r) => r.roomId === data.roomId);
+                if (!room) {
+                    room = { roomId: data.roomId, users: [] };
+                    socketRooms.push(room);
+                }
+                if (!room.users.includes(data.userId)) {
+                    room.users.push(data.userId);
+                }
+                // Associate WebSocket connection with the room
+                ws.roomId = data.roomId;
+                // Only notify clients **in the same room**
                 wss.clients.forEach((client) => {
-                    if (client.readyState === ws_1.default.OPEN) {
-                        client.send(JSON.stringify({ type: "userList", users: Object.keys(users) }));
+                    if (client.roomId === data.roomId &&
+                        client.readyState === ws_1.default.OPEN) {
+                        client.send(JSON.stringify({
+                            type: "userListUpdate",
+                            roomId: data.roomId,
+                            users: room.users,
+                        }));
                     }
                 });
             }
