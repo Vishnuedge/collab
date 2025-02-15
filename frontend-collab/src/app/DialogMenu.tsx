@@ -4,13 +4,21 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input"
 import { JSXElementConstructor, RefObject, useState } from "react";
 
+interface SongList {
+    id: string,
+    songName: string,
+    duration: number,
+    authorName: string
+}
 
 interface DialogProps {
     open: boolean,
     onClose: () => void,
     handleSearch: (value: string) => void,
     handleSubmit: () => void,
-    info: string[],
+    handleCheckParent: (value: SongList) => void,
+    info: SongList[],
+    handleGenerateRoom: () => void
 }
 
 export function DialogMenu(props: DialogProps) {
@@ -20,7 +28,9 @@ export function DialogMenu(props: DialogProps) {
         onClose,
         handleSearch,
         handleSubmit,
-        info
+        handleCheckParent,
+        info,
+        handleGenerateRoom
     } = props;
 
     const handleClose = () => {
@@ -35,8 +45,12 @@ export function DialogMenu(props: DialogProps) {
         handleSubmit()
     }
 
-    const handleCheck = (e: any) => {
-        console.log(e.target.checked)
+    const handleCheck = (song: SongList) => {
+        handleCheckParent(song)
+    }
+
+    const handleGenerateButton = () => {
+        handleGenerateRoom()
     }
     return (
         <Dialog open={open} onOpenChange={handleClose}>
@@ -53,13 +67,14 @@ export function DialogMenu(props: DialogProps) {
                     {
                         info.map((ele, index) => (
                             <div key={index} className="flex" >
-                                <Checkbox onClick={handleCheck} />
-                                <p >{ele}</p>
+                                <Checkbox onCheckedChange={() => handleCheck(ele)} />
+                                <p >{ele.songName}</p>
+                                <p >{ele.authorName}</p>
                             </div>
                         ))
                     }
                 </div>
-                <Button variant="outline" >Generate Room Id</Button>
+                <Button variant="outline" onClick={handleGenerateButton} >Generate Room Id</Button>
             </DialogContent>
         </Dialog>
 

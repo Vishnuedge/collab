@@ -4,6 +4,13 @@ import axios from "axios";
 
 const router = express.Router();
 
+interface SongList {
+    id: string,
+    songName: string,
+    duration: number,
+    authorName: string
+}
+
 router.post("/getTracks", spotifyAuthenticate, async (req, res) => {
     const accessToken = req["authorization"];
     const data = req.body;
@@ -17,11 +24,19 @@ router.post("/getTracks", spotifyAuthenticate, async (req, res) => {
                 "Content-Type": "application/json",
             },
         })
-        response.data["tracks"]["items"].map(ele => {
-            console.log(ele?.album?.artists[0]?.name)
+        const songList: SongList[] = []
+
+        response.data["tracks"]["items"].map(song => {
+            let songInfo = {
+                id: song.id,
+                songName: song.name,
+                duration: song.duration_ms,
+                authorName: song.artists[0].name
+            }
+            songList.push(songInfo);
         })
 
-        res.send(response.data)
+        res.send(songList)
 
     } catch (error) {
         console.log(error)
